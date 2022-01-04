@@ -11,6 +11,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using LSS.Identidade.API.Extensions;
 
 namespace LSS.Identidade.API
 {
@@ -33,7 +37,34 @@ namespace LSS.Identidade.API
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
-                
+
+            //JWT
+
+            var appSettingsSection = Configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsSection);
+
+            var appSettings = appSettingsSection.Get<AppSettings>();
+            var key = Encoding.ASCII.GetBytes(appSettings.Secret);
+
+            services.AddAuthentication(configureOptions: options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(x =>
+               {
+                   x.RequireHttpsMetadata = true;
+                   x.SaveToken = true;
+                   x.TokenValidationParameters = new TokenValidationParameters
+                   {
+                       ValidateIssuerSigningKey = true,
+                       IssuerSigningKey = new SymmetricSecurityKey(key),
+                       ValidateIssuer = true,
+                       ValidateAudience = true,
+                       ValidAudience= appSettings.ValidoEm,
+                       ValidIssuer= appSettings.Emissor
+                   };
+               });
+
             services.AddControllers();
 
             services.AddSwaggerGen(c => c.SwaggerDoc(name:"v1", new Microsoft.OpenApi.Models.OpenApiInfo{
