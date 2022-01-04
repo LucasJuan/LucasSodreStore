@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace LSS.Identidade.API.Controllers
 {
+    [ApiController]
     [Route("api/Identidade")]
     public class AuthController : Controller
     {

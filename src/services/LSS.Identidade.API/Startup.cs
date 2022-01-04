@@ -35,12 +35,25 @@ namespace LSS.Identidade.API
                 .AddDefaultTokenProviders();
                 
             services.AddControllers();
+
+            services.AddSwaggerGen(c => c.SwaggerDoc(name:"v1", new Microsoft.OpenApi.Models.OpenApiInfo{
+                Title="Lucas Sodré Enterprise Identity API",
+                Description="Esta API faz parte do curso de ASP.NET COORE Enterprise Applications",
+                Contact = new Microsoft.OpenApi.Models.OpenApiContact() { Name="Lucas Juan", Email="lucasjuan18@gmail.com"},
+                License = new Microsoft.OpenApi.Models.OpenApiLicense() { Name="MIT", Url = new Uri("https://opensource.org/licenses/MIT")}
+            }));
             
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseSwagger();
+            app.UseSwaggerUI(c=>
+            {
+                c.SwaggerEndpoint(url: "/swagger/v1/swagger.json", name:"V1");
+            });
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -50,7 +63,7 @@ namespace LSS.Identidade.API
             app.UseRouting();
 
             app.UseAuthorization();
-            app.UseAuthentication();
+            app.UseAuthentication(); 
 
             app.UseEndpoints(endpoints =>
             {
