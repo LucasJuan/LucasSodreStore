@@ -35,7 +35,7 @@ namespace LSS.Identidade.API
 
             services.AddDefaultIdentity<IdentityUser>()
                 .AddRoles<IdentityRole>()
-                .AddErrorDescriber<IdeeentityMensagensPortugues>()
+                .AddErrorDescriber<IdentityMensagensPortugues>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 

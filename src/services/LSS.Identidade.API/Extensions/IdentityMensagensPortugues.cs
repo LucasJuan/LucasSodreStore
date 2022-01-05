@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LSS.Identidade.API.Extensions
 {
-    public class IdeeentityMensagensPortugues: IdentityErrorDescriber
+    public class IdentityMensagensPortugues: IdentityErrorDescriber
     {
         public override IdentityError DefaultError() { return new IdentityError { Code = nameof(DefaultError), Description = $"Ocorreu um erro descoonhecido." }; }
         public override IdentityError ConcurrencyFailure() { return new IdentityError { Code = nameof(ConcurrencyFailure), Description = $"Falha de concorrência otimista, o objeto foi moodificado." }; }
