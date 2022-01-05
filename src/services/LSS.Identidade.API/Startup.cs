@@ -15,96 +15,49 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using LSS.Identidade.API.Extensions;
+using LSS.Identidade.API.Configuration;
 
 namespace LSS.Identidade.API
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public IConfiguration Configuration { get; }
+
+        public Startup(IHostEnvironment hostEnvironment)
         {
-            Configuration = configuration;
+            //adicioonando o appsettings.desenvolvimento.json na aplicação quando subir para o servidor
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(hostEnvironment.ContentRootPath)
+                .AddJsonFile("appsettings.json", true, true)
+                .AddJsonFile($"appsettings.{hostEnvironment.EnvironmentName}.json", true, true)
+                .AddEnvironmentVariables();
+            if(hostEnvironment.IsDevelopment())
+            {
+                builder.AddUserSecrets<Startup>();
+            }
+            Configuration = builder.Build();
         }
 
-        public IConfiguration Configuration { get; }
+        
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddIdentityConfiguration(Configuration);
 
-            services.AddDefaultIdentity<IdentityUser>()
-                .AddRoles<IdentityRole>()
-                .AddErrorDescriber<IdentityMensagensPortugues>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+            services.AddApiConfiguration();
 
-            //JWT
-
-            var appSettingsSection = Configuration.GetSection("AppSettings");
-            services.Configure<AppSettings>(appSettingsSection);
-
-            var appSettings = appSettingsSection.Get<AppSettings>();
-            var key = Encoding.ASCII.GetBytes(appSettings.Secret);
-
-            services.AddAuthentication(configureOptions: options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(x =>
-               {
-                   x.RequireHttpsMetadata = true;
-                   x.SaveToken = true;
-                   x.TokenValidationParameters = new TokenValidationParameters
-                   {
-                       ValidateIssuerSigningKey = true,
-                       IssuerSigningKey = new SymmetricSecurityKey(key),
-                       ValidateIssuer = true,
-                       ValidateAudience = true,
-                       ValidAudience= appSettings.ValidoEm,
-                       ValidIssuer= appSettings.Emissor
-                   };
-               });
-
-            services.AddControllers();
-
-            services.AddSwaggerGen(c => c.SwaggerDoc(name:"v1", new Microsoft.OpenApi.Models.OpenApiInfo{
-                Title="Lucas Sodré Enterprise Identity API",
-                Description="Esta API faz parte do curso de ASP.NET COORE Enterprise Applications",
-                Contact = new Microsoft.OpenApi.Models.OpenApiContact() { Name="Lucas Juan", Email="lucasjuan18@gmail.com"},
-                License = new Microsoft.OpenApi.Models.OpenApiLicense() { Name="MIT", Url = new Uri("https://opensource.org/licenses/MIT")}
-            }));
+            services.AddSwaggerConfiguration();
             
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseSwagger();
-            app.UseSwaggerUI(c=>
-            {
-                c.SwaggerEndpoint(url: "/swagger/v1/swagger.json", name:"V1");
-            });
+            app.UseSwaggerConfiguration();
 
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            app.UseHttpsRedirection();
-
-            app.UseRouting();
-
-            app.UseAuthorization();
-            app.UseAuthentication(); 
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapGet("/", async context =>
-                {
-                    await context.Response.WriteAsync("Hello World!");
-                });
-                endpoints.MapControllers();
-            });
+            app.UseApiConfiguration(env);
         }
     }
 }

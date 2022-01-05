@@ -75,6 +75,48 @@ namespace LSS.Identidade.API.Controllers
         {
             var user = await _userManager.FindByEmailAsync(email);
             var claims = await _userManager.GetClaimsAsync(user);
+
+            ClaimsIdentity identityClaims = await ObterClaimsUsuario(user, claims);
+
+            string encodedToken = CodificarToken(identityClaims);
+
+            return ObterTokenResposta(user, claims, encodedToken); ;
+        }
+
+        private UsuarioRespostaLogin ObterTokenResposta(IdentityUser user, IList<Claim> claims, string encodedToken)
+        {
+            return new UsuarioRespostaLogin
+            {
+                AcessToken = encodedToken,
+                ExpiresIn = TimeSpan.FromHours(_appSettings.ExpiracaoHoras).TotalSeconds,
+                UsuarioToken = new UsuarioToken
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    Claims = claims.Select(c => new UsuarioClaim { Type = c.Type, Value = c.Value })
+                }
+            };
+        }
+
+        private string CodificarToken(ClaimsIdentity identityClaims)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+
+            var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
+            {
+                Issuer = _appSettings.Emissor,
+                Audience = _appSettings.ValidoEm,
+                Subject = identityClaims,
+                Expires = DateTime.UtcNow.AddHours(_appSettings.ExpiracaoHoras),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            });
+
+            return tokenHandler.WriteToken(token); 
+        }
+
+        private async Task<ClaimsIdentity> ObterClaimsUsuario(IdentityUser user, IList<Claim> claims)
+        {
             var userRoles = await _userManager.GetRolesAsync(user);
 
             claims.Add(new System.Security.Claims.Claim(JwtRegisteredClaimNames.Sub, user.Id));
@@ -88,33 +130,9 @@ namespace LSS.Identidade.API.Controllers
             }
             var identityClaims = new ClaimsIdentity();
             identityClaims.AddClaims(claims);
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
-
-            var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
-            {
-                Issuer = _appSettings.Emissor,
-                Audience = _appSettings.ValidoEm,
-                Subject = identityClaims,
-                Expires = DateTime.UtcNow.AddHours(_appSettings.ExpiracaoHoras),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            });
-            var encodedToken = tokenHandler.WriteToken(token);
-
-            var response = new UsuarioRespostaLogin
-            {
-                AcessToken = encodedToken,
-                ExpiresIn = TimeSpan.FromHours(_appSettings.ExpiracaoHoras).TotalSeconds,
-                UsuarioToken = new UsuarioToken
-                {
-                    Id = user.Id,
-                    Email = user.Email,
-                    Claims = claims.Select(c => new UsuarioClaim { Type = c.Type, Value = c.Value })
-                }
-            };
-
-            return response;
+            return identityClaims;
         }
+
         private static long ToUnixEpochDate(DateTime date)
             => (long)Math.Round((date.ToUniversalTime() - new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero)).TotalSeconds);
     }
