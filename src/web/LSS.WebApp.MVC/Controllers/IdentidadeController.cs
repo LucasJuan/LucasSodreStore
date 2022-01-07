@@ -1,4 +1,5 @@
 ﻿using LSS.WebApp.MVC.Models;
+using LSS.WebApp.MVC.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,11 @@ namespace LSS.WebApp.MVC.Controllers
 {
     public class IdentidadeController : Controller
     {
+        private readonly IAutenticacaoService _autenticacaoService;
+        public IdentidadeController(IAutenticacaoService autenticacaoService)
+        {
+            _autenticacaoService = autenticacaoService;
+        }
         [HttpGet]
         [Route("nova-conta")]
         public IActionResult Registro()
@@ -19,6 +25,8 @@ namespace LSS.WebApp.MVC.Controllers
         [Route("nova-conta")]
         public async Task<IActionResult> Registro(UsuarioRegistro usuarioRegistro)
         {
+            var resposta = await _autenticacaoService.Registro(usuarioRegistro);
+
             if (!ModelState.IsValid) return View(usuarioRegistro);
 
             //API - Registro
@@ -43,6 +51,7 @@ namespace LSS.WebApp.MVC.Controllers
             if (!ModelState.IsValid) return View(usuarioLogin);
 
             //API - Login
+            var resposta = await _autenticacaoService.Login(usuarioLogin);
 
             if (false) return View(usuarioLogin);
 

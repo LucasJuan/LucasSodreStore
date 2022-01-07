@@ -22,6 +22,7 @@ namespace LSS.WebApp.MVC
             services.AddIdentityConfiguration();
 
             services.AddMvcWebAppConfiguration();
+            services.RegisterServices();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
