@@ -1,9 +1,8 @@
-﻿using LSS.WebApp.MVC.Services;
+﻿using LSS.WebApp.MVC.Extensions;
+using LSS.WebApp.MVC.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace LSS.WebApp.MVC.Configuration
 {
@@ -12,6 +11,9 @@ namespace LSS.WebApp.MVC.Configuration
         public static void RegisterServices(this IServiceCollection services)
         {
             services.AddHttpClient<IAutenticacaoService, AutenticacaoService>();
+            // singleton pois é acesso ao próprio contexto
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddScoped<IUser, AspNetUser>();
         }
     }
 }

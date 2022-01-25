@@ -87,7 +87,7 @@ namespace LSS.Identidade.API.Controllers
         {
             return new UsuarioRespostaLogin
             {
-                AcessToken = encodedToken,
+                AccessToken = encodedToken,
                 ExpiresIn = TimeSpan.FromHours(_appSettings.ExpiracaoHoras).TotalSeconds,
                 UsuarioToken = new UsuarioToken
                 {
