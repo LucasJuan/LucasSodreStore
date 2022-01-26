@@ -28,7 +28,6 @@ namespace LSS.WebApp.MVC.Services
             {
                 PropertyNameCaseInsensitive = true,
             };
-
             if (!TratarErrosResponse(response))
             {
                 return new UsuarioRespostaLogin

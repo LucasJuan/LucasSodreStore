@@ -17,6 +17,6 @@ namespace LSS.WebApp.MVC.Models
     }
     public class ResponseErrorMessages
     {
-        public IList<string> Messages { get; set; }
+        public List<string> Mensagens { get; set; }
     }
 }

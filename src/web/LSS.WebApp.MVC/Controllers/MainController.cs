@@ -11,8 +11,12 @@ namespace LSS.WebApp.MVC.Controllers
     {
        protected bool ResponsePossuiErros(ResponseResult resposta)
         {
-            if(resposta != null && resposta.Errors.Messages.Any())
+            if(resposta != null && resposta.Errors.Mensagens.Any())
             {
+                foreach (var item in resposta.Errors.Mensagens)
+                {
+                    ModelState.AddModelError(string.Empty, item);
+                }
                 return true;
             }
             return false;
