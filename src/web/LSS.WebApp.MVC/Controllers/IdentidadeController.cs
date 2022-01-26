@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace LSS.WebApp.MVC.Controllers
 {
-    public class IdentidadeController : Controller
+    public class IdentidadeController : MainController
     {
         private readonly IAutenticacaoService _autenticacaoService;
         public IdentidadeController(IAutenticacaoService autenticacaoService)
@@ -29,13 +29,14 @@ namespace LSS.WebApp.MVC.Controllers
         [Route("nova-conta")]
         public async Task<IActionResult> Registro(UsuarioRegistro usuarioRegistro)
         {
-            var resposta = await _autenticacaoService.Registro(usuarioRegistro);
+            
 
             if (!ModelState.IsValid) return View(usuarioRegistro);
 
             //API - Registro
+            var resposta = await _autenticacaoService.Registro(usuarioRegistro);
 
-            //if (false) return View(usuarioRegistro);
+            if (ResponsePossuiErros(resposta.ResponseResult)) return View(usuarioRegistro);
 
             // Realizar Login na API
             await RealizarLogin(resposta);
@@ -58,7 +59,7 @@ namespace LSS.WebApp.MVC.Controllers
             //API - Login
             var resposta = await _autenticacaoService.Login(usuarioLogin);
 
-            //if (false) return View(usuarioLogin);
+            if (ResponsePossuiErros(resposta.ResponseResult)) return View(usuarioLogin);
 
             // Realizar Login na APP
             await RealizarLogin(resposta);

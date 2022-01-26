@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace LSS.WebApp.MVC.Services
 {
-    public class AutenticacaoService : IAutenticacaoService
+    public class AutenticacaoService : Service, IAutenticacaoService
     {
         private readonly HttpClient _httpClient;
         public AutenticacaoService(HttpClient httpClient)
@@ -23,11 +23,20 @@ namespace LSS.WebApp.MVC.Services
                 );
 
             var response = await _httpClient.PostAsync("https://localhost:44394/api/Identidade/autenticar", loginContent);
+
             var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
             };
 
+            if (!TratarErrosResponse(response))
+            {
+                return new UsuarioRespostaLogin
+                {
+                    ResponseResult = JsonSerializer.Deserialize<ResponseResult>(await response.Content.ReadAsStringAsync(), options)
+                };
+            };
+           
             return JsonSerializer.Deserialize<UsuarioRespostaLogin>(await response.Content.ReadAsStringAsync(), options);
         }
 
@@ -42,9 +51,18 @@ namespace LSS.WebApp.MVC.Services
             var response = await _httpClient.PostAsync("https://localhost:44394/api/Identidade/nova-conta", registronContent);
 
             // como está usando o system.text.json precisa serializar as options para ficar igual as propriedades
+
             var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
+            };
+
+            if (!TratarErrosResponse(response))
+            {
+                return new UsuarioRespostaLogin
+                {
+                    ResponseResult = JsonSerializer.Deserialize<ResponseResult>(await response.Content.ReadAsStringAsync(), options)
+                };
             };
 
             return JsonSerializer.Deserialize<UsuarioRespostaLogin>(await response.Content.ReadAsStringAsync(), options);

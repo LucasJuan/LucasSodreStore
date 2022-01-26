@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace LSS.WebApp.MVC.Models
 {
@@ -7,5 +8,15 @@ namespace LSS.WebApp.MVC.Models
         public string RequestId { get; set; }
 
         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+    }
+    public class ResponseResult
+    {
+        public string Title { get; set; }
+        public int Status { get; set; }
+        public ResponseErrorMessages Errors { get; set; }
+    }
+    public class ResponseErrorMessages
+    {
+        public IList<string> Messages { get; set; }
     }
 }
