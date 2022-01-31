@@ -29,11 +29,11 @@ namespace LSS.WebApp.MVC.Services
             switch ((int)response.StatusCode)
             {
                 case 401:
-                    throw new CustomHttpRequestException(response.StatusCode);
+                
                 case 403:
-                    throw new CustomHttpRequestException(response.StatusCode);
+
                 case 404:
-                    throw new CustomHttpRequestException(response.StatusCode);
+
                 case 500:
                     throw new CustomHttpRequestException(response.StatusCode);
                 case 400:

@@ -9,19 +9,29 @@ namespace LSS.WebApp.MVC
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public IConfiguration Configuration { get; }
+
+        public Startup(IHostingEnvironment hostEnviroment)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(hostEnviroment.ContentRootPath)
+                .AddJsonFile("appsettings.json", true, true)
+                .AddJsonFile($"appsettings.{hostEnviroment.EnvironmentName}.json", true, true)
+                .AddEnvironmentVariables();
+                    if (hostEnviroment.IsDevelopment())
+                    {
+                        builder.AddUserSecrets<Startup>();
+                    }
+                    Configuration = builder.Build();
         }
 
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddIdentityConfiguration();
 
-            services.AddMvcWebAppConfiguration();
+            services.AddMvcWebAppConfiguration(Configuration);
             services.RegisterServices();
         }
 
@@ -30,7 +40,7 @@ namespace LSS.WebApp.MVC
         {
 
             app.UseMvcWebAppConfiguration(env);
-          
+
         }
     }
 }
