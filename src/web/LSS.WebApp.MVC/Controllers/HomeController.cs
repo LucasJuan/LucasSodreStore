@@ -28,7 +28,7 @@ namespace LSS.WebApp.MVC.Controllers
             var modelErro = new ErrorViewModel();
             if (id == 500)
             {
-                modelErro.Mensagem = "Ocorreu um erro! Tente novaamente mais ttarde ou contate o nosso suporte.";
+                modelErro.Mensagem = "Ocorreu um erro! Tente novamente mais tarde ou contate o nosso suporte.";
                 modelErro.Titulo = "Ocorreu um erro!";
                 modelErro.ErroCode = id;
             }
