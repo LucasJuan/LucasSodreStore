@@ -43,7 +43,7 @@ namespace LSS.Identidade.API.Controllers
             var result = await _userManager.CreateAsync(user, usuarioRegistro.Senha);
             if (result.Succeeded)
             {
-                return CustomResponse(GerarJwt(user.Email));
+                return CustomResponse(await GerarJwt(user.Email));
             }
 
             foreach (var item in result.Errors)
